@@ -11,22 +11,26 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ExitToApp
 import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.runtime.*
+import com.arkivanov.decompose.extensions.compose.jetbrains.stack.Children
+import com.arkivanov.decompose.extensions.compose.jetbrains.stack.animation.slide
+import com.arkivanov.decompose.extensions.compose.jetbrains.stack.animation.stackAnimation
+import com.arkivanov.decompose.extensions.compose.jetbrains.subscribeAsState
 import org.jetbrains.compose.ui.tooling.preview.Preview
-
-import testkmm.composeapp.generated.resources.Res
-import testkmm.composeapp.generated.resources.compose_multiplatform
+import org.reringuy.kmmproject.navigation.RootComponent
+import org.reringuy.kmmproject.screens.BScreen
+import org.reringuy.kmmproject.screens.HomeScreen
 
 @Composable
 @Preview
-fun App() {
+fun App(rootComponent: RootComponent) {
     MaterialTheme {
-        AppNavigation()
+        AppNavigation(rootComponent)
     }
 }
 
 @Composable
-fun AppNavigation() {
-    val navController =
+fun AppNavigation(rootComponent: RootComponent) {
+    val childStack by rootComponent.childStack.subscribeAsState()
 
     Scaffold(
         topBar = {
@@ -49,6 +53,14 @@ fun AppNavigation() {
             )
         }
     ) { innerPadding ->
-
+        Children(
+            stack = childStack,
+            animation = stackAnimation(slide())
+        ){ child ->
+            when(val instance = child.instance){
+                is RootComponent.Child.ScreenB -> BScreen(instance.comoponent.text, instance.comoponent)
+                is RootComponent.Child.ScreenHome -> HomeScreen(instance.comoponent)
+            }
+        }
     }
 }
